@@ -384,22 +384,137 @@ const BlogPage = () => {
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">My Notes</h1>
           <p className="text-gray-500 dark:text-gray-400">Capture your thoughts, ideas, and inspirations</p>
         </header>
-        <MenuBar editor={editor} />
+        
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md flex flex-col">
-        <EditorProvider
-
-          onCreate={({ editor }) => setEditor(editor)}
-          extensions={extensions}
-          content={content}
-        >
-          <EditorContent editor={editor} />
-        </EditorProvider>
-      </div>
+          <MenuBar editor={editor} />
+          <div className="pageless-editor">
+            <EditorProvider
+              onCreate={({ editor }) => setEditor(editor)}
+              extensions={extensions}
+              content={content}
+              editorProps={{
+                attributes: {
+                  class: 'focus:outline-none',
+                },
+              }}
+            >
+              <EditorContent className="prose-editor" />
+            </EditorProvider>
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
+// Add custom styles for the pageless editor experience
+const styles = `
+  <style>
+    /* Pageless editor styling */
+    .pageless-editor {
+      min-height: 80vh;
+      padding: 0;
+      position: relative;
+    }
+    
+    .pageless-editor .ProseMirror {
+      min-height: 80vh;
+      padding: 2rem 4rem;
+      max-width: 850px;
+      margin: 0 auto;
+      outline: none !important;
+    }
+    
+    /* Content styling */
+    .pageless-editor .ProseMirror h1 {
+      font-size: 2rem;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      color: #111827;
+    }
+    
+    .pageless-editor .ProseMirror h2 {
+      font-size: 1.5rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      color: #111827;
+    }
+    
+    .pageless-editor .ProseMirror h3 {
+      font-size: 1.25rem;
+      margin-top: 1.25rem;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      color: #111827;
+    }
+    
+    .pageless-editor .ProseMirror h4 {
+      font-size: 1.125rem;
+      margin-top: 1.25rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #111827;
+    }
+    
+    .pageless-editor .ProseMirror p {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      line-height: 1.7;
+    }
+    
+    .pageless-editor .ProseMirror blockquote {
+      padding-left: 1rem;
+      border-left: 4px solid #e5e7eb;
+      font-style: italic;
+      color: #6b7280;
+    }
+    
+    .pageless-editor .ProseMirror ul {
+      list-style-type: disc;
+      padding-left: 1.5rem;
+      margin: 1rem 0;
+    }
+    
+    .pageless-editor .ProseMirror ol {
+      list-style-type: decimal;
+      padding-left: 1.5rem;
+      margin: 1rem 0;
+    }
+    
+    .pageless-editor .ProseMirror li {
+      margin: 0.5rem 0;
+    }
+    
+    .pageless-editor .ProseMirror pre {
+      margin: 1rem 0;
+      border-radius: 0.375rem;
+      overflow-x: auto;
+    }
+    
+    /* Dark mode compatibility */
+    @media (prefers-color-scheme: dark) {
+      .pageless-editor .ProseMirror h1,
+      .pageless-editor .ProseMirror h2,
+      .pageless-editor .ProseMirror h3,
+      .pageless-editor .ProseMirror h4 {
+        color: #f9fafb;
+      }
+      
+      .pageless-editor .ProseMirror blockquote {
+        border-left-color: #4b5563;
+        color: #9ca3af;
+      }
+    }
+  </style>
+`;
+
 export const Route = createFileRoute('/blog/')({
-  component: BlogPage,
-})
+  component: () => (
+    <>
+      <div dangerouslySetInnerHTML={{ __html: styles }} />
+      <BlogPage />
+    </>
+  ),
+});
