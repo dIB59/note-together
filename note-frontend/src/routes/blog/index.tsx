@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Color } from '@tiptap/extension-color'
 import ListItem from '@tiptap/extension-list-item'
 import TextStyle from '@tiptap/extension-text-style'
-import { EditorProvider, useCurrentEditor } from '@tiptap/react'
+import { Editor, EditorContent, EditorProvider, useCurrentEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Button } from '@/components/ui/button'
 import { type Level } from '@tiptap/extension-heading'
@@ -10,48 +10,22 @@ import {
   Bold, Italic, Strikethrough, Code, ChevronsUp, 
   Undo2, Redo2, List, ListOrdered, Quote, Heading1, 
   Heading2, Heading3, TerminalSquare, Minus, PenTool, 
-  SeparatorHorizontal, Trash, Palette
+  SeparatorHorizontal, Trash, Palette, ChevronDown
 } from 'lucide-react'
+import Placeholder from '@tiptap/extension-placeholder'
+import { useState } from 'react'
 
-const BlogPage = () => {
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto p-4 md:p-8">
-        <header className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">My Notes</h1>
-        </header>
-        
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
-          <EditorProvider 
-            slotBefore={<MenuBar />} 
-            extensions={extensions} 
-            content={content}
-            editorProps={{
-              attributes: {
-                class: 'prose dark:prose-invert max-w-none focus:outline-none p-6',
-              },
-            }}
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export const Route = createFileRoute('/blog/')({
-  component: BlogPage,
-})
-
-const MenuBar = () => {
-  const { editor } = useCurrentEditor()
-
+const MenuBar = ({ editor }) => {
   if (!editor) return null
 
-  const getVariant = (isActive: boolean) => (isActive ? 'default' : 'ghost')
+  const getVariant = (isActive) => (isActive ? 'default' : 'ghost')
   const headingLevels = [
-    { level: 1, icon: <Heading1 className="h-4 w-4" /> },
-    { level: 2, icon: <Heading2 className="h-4 w-4" /> },
-    { level: 3, icon: <Heading3 className="h-4 w-4" /> },
+    { level: 1, icon: <Heading1 className="h-4 w-4" />, label: "Heading 1" },
+    { level: 2, icon: <Heading2 className="h-4 w-4" />, label: "Heading 2" },
+    { level: 3, icon: <Heading3 className="h-4 w-4" />, label: "Heading 3" },
+    { level: 4, icon: <Heading3 className="h-4 w-4 scale-90" />, label: "Heading 4" },
+    { level: 5, icon: <Heading3 className="h-4 w-4 scale-75" />, label: "Heading 5" },
+    { level: 6, icon: <Heading3 className="h-4 w-4 scale-65" />, label: "Heading 6" },
   ]
 
   const colors = [
@@ -60,10 +34,12 @@ const MenuBar = () => {
     { name: 'Blue', color: '#4285F4' },
     { name: 'Green', color: '#34A853' },
     { name: 'Red', color: '#EA4335' },
+    { name: 'Orange', color: '#FFA500' },
+    { name: 'Teal', color: '#008080' },
   ]
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-700 p-2">
+    <div className="border-b border-gray-200 dark:border-gray-700 p-2 sticky top-0 bg-white dark:bg-gray-800 z-10 shadow-sm">
       <div className="flex flex-wrap gap-1">
         <div className="flex items-center space-x-1 mr-2">
           <Button
@@ -120,23 +96,24 @@ const MenuBar = () => {
               title="Text Color"
             >
               <Palette className="h-4 w-4" />
+              <ChevronDown className="h-3 w-3 ml-1" />
             </Button>
             
-            <div className="absolute hidden group-hover:flex flex-col bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 z-10 top-full left-0 mt-1">
+            <div className="absolute hidden group-hover:flex flex-col bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 z-10 top-full left-0 mt-1 w-40">
               {colors.map((item) => (
                 <Button
                   key={item.color}
                   size="sm"
                   variant="ghost"
-                  className="justify-start h-8"
+                  className="justify-start h-8 mb-1 last:mb-0"
                   onClick={() => editor.chain().focus().setColor(item.color).run()}
                 >
-                  <div className="flex items-center">
+                  <div className="flex items-center w-full">
                     <div 
-                      className="h-4 w-4 rounded-full mr-2" 
+                      className="h-4 w-4 rounded-full mr-2 flex-shrink-0 border border-gray-200 dark:border-gray-700" 
                       style={{ backgroundColor: item.color }}
                     ></div>
-                    <span>{item.name}</span>
+                    <span className="truncate">{item.name}</span>
                   </div>
                 </Button>
               ))}
@@ -165,20 +142,21 @@ const MenuBar = () => {
               title="Headings"
             >
               <Heading1 className="h-4 w-4" />
+              <ChevronDown className="h-3 w-3 ml-1" />
             </Button>
             
-            <div className="absolute hidden group-hover:flex flex-col bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 z-10 top-full left-0 mt-1">
+            <div className="absolute hidden group-hover:flex flex-col bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 z-10 top-full left-0 mt-1 w-40">
               {headingLevels.map((item) => (
                 <Button
                   key={item.level}
                   size="sm"
                   variant={getVariant(editor.isActive('heading', { level: item.level }))}
                   onClick={() => editor.chain().focus().toggleHeading({ level: item.level }).run()}
-                  className="justify-start"
+                  className="justify-start mb-1 last:mb-0"
                 >
                   <div className="flex items-center">
                     {item.icon}
-                    <span className="ml-2">Heading {item.level}</span>
+                    <span className="ml-2">{item.label}</span>
                   </div>
                 </Button>
               ))}
@@ -294,52 +272,134 @@ const MenuBar = () => {
   )
 }
 
-export default MenuBar
-
 const extensions = [
   Color.configure({ types: [TextStyle.name, ListItem.name] }),
   TextStyle.configure({}),
   StarterKit.configure({
+    heading: {
+      levels: [1, 2, 3, 4, 5, 6],
+    },
     bulletList: {
       keepMarks: true,
-      keepAttributes: false,
+      keepAttributes: true,
     },
     orderedList: {
       keepMarks: true,
-      keepAttributes: false,
+      keepAttributes: true,
     },
+    codeBlock: {
+      HTMLAttributes: {
+        class: 'block rounded-md bg-gray-100 dark:bg-gray-800 p-4 font-mono text-sm',
+      },
+    },
+  }),
+  Placeholder.configure({
+    placeholder: 'Start writing your notes here...',
   }),
 ]
 
 const content = `
-<h2>
+<h1>
   Welcome to My Notes
-</h2>
+</h1>
 <p>
-  This is your <em>modern</em> and <strong>elegant</strong> note-taking space. You can format text in various ways:
+  This is your <em>modern</em> and <strong>elegant</strong> note-taking space with a Google Docs-like pageless view. You can scroll indefinitely and format text in various ways:
 </p>
+
+<h2>Formatting Options</h2>
 <ul>
   <li>
-    Create lists to organize your thoughts
+    Create <strong>bullet lists</strong> to organize your thoughts
   </li>
   <li>
-    Use <em>formatting</em> to <strong>emphasize</strong> important points
+    Use <em>italic</em>, <strong>bold</strong>, and <span style="color: #958DF1;">colored text</span> to emphasize important points
   </li>
   <li>
-    Add structure with headings and quotes
+    Add structure with <strong>headings</strong> and <strong>quotes</strong>
   </li>
 </ul>
+
+<h3>Code Examples</h3>
 <p>
   Need to add some code? No problem:
 </p>
 <pre><code class="language-javascript">// Here's a code example
 function greet() {
   console.log("Hello, world!");
-}</code></pre>
+}
+
+// Try it out
+greet();</code></pre>
+
+<h2>Organize Your Thoughts</h2>
 <p>
-  This editor supports all the formatting tools you need to capture and organize your ideas effectively.
+  Use different heading levels to create a structured document:
 </p>
+
+<h4>To-Do List</h4>
+<ol>
+  <li>Create meeting agenda</li>
+  <li>Review project timeline</li>
+  <li>Send follow-up emails</li>
+</ol>
+
+<h4>Project Notes</h4>
+<p>
+  This editor supports all the formatting tools you need to capture and organize your ideas effectively. The vertical space extends as much as you need, just like Google Docs in pageless mode.
+</p>
+
 <blockquote>
   Great notes lead to great ideas. Start writing!
 </blockquote>
+
+<h2>Advanced Features</h2>
+<p>
+  Experiment with the toolbar above to discover all the formatting options available. You can create:
+</p>
+<ul>
+  <li>Formatted headings (6 levels)</li>
+  <li>Ordered and unordered lists</li>
+  <li>Code blocks with syntax highlighting</li>
+  <li>Blockquotes for important citations</li>
+  <li>Text in different colors</li>
+</ul>
+
+<p>
+  The editor automatically saves your work as you type, so you never have to worry about losing your notes.
+</p>
+
+<h3>Share and Collaborate</h3>
+<p>
+  When you're ready, share your notes with colleagues or friends to collaborate on ideas together.
+</p>
 `
+
+const BlogPage = () => {
+  const [editor, setEditor] = useState<Editor | null>(null)
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto p-4 md:p-8">
+        <header className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">My Notes</h1>
+          <p className="text-gray-500 dark:text-gray-400">Capture your thoughts, ideas, and inspirations</p>
+        </header>
+        <MenuBar editor={editor} />
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md flex flex-col">
+        <EditorProvider
+
+          onCreate={({ editor }) => setEditor(editor)}
+          extensions={extensions}
+          content={content}
+        >
+          <EditorContent editor={editor} />
+        </EditorProvider>
+      </div>
+      </div>
+    </div>
+  )
+}
+
+export const Route = createFileRoute('/blog/')({
+  component: BlogPage,
+})
