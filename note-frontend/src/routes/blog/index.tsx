@@ -2,24 +2,26 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Color } from '@tiptap/extension-color'
 import ListItem from '@tiptap/extension-list-item'
 import TextStyle from '@tiptap/extension-text-style'
-import { Editor, EditorContent, EditorProvider, useCurrentEditor } from '@tiptap/react'
+import { Editor, EditorContent, EditorProvider } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Button } from '@/components/ui/button'
 import { type Level } from '@tiptap/extension-heading'
 import { 
   Bold, Italic, Strikethrough, Code, ChevronsUp, 
   Undo2, Redo2, List, ListOrdered, Quote, Heading1, 
-  Heading2, Heading3, TerminalSquare, Minus, PenTool, 
+  Heading2, Heading3, TerminalSquare, PenTool, 
   SeparatorHorizontal, Trash, Palette, ChevronDown
 } from 'lucide-react'
 import Placeholder from '@tiptap/extension-placeholder'
-import { useState } from 'react'
+import { useState, type JSX } from 'react'
 
-const MenuBar = ({ editor }) => {
+// Removed duplicate import of Editor
+
+const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null
 
-  const getVariant = (isActive) => (isActive ? 'default' : 'ghost')
-  const headingLevels = [
+  const getVariant = (isActive: boolean) => (isActive ? 'default' : 'ghost')
+  const headingLevels: { level: Level; icon: JSX.Element; label: string }[] = [
     { level: 1, icon: <Heading1 className="h-4 w-4" />, label: "Heading 1" },
     { level: 2, icon: <Heading2 className="h-4 w-4" />, label: "Heading 2" },
     { level: 3, icon: <Heading3 className="h-4 w-4" />, label: "Heading 3" },
@@ -398,7 +400,7 @@ const BlogPage = () => {
                 },
               }}
             >
-              <EditorContent className="prose-editor" />
+              <EditorContent className="prose-editor" editor={editor} />
             </EditorProvider>
           </div>
         </div>
