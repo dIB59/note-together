@@ -4,3 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+config = "0.15.11"
+serde = { version = "1", features = ["derive"] }
+sqlx = { version = "0.8.5", features = ["postgres", "sqlite", "runtime-tokio-native-tls", "macros"] }
+actix-web = "4.4.1"
+actix-web-actors = "4"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+yrs = "0.23.1"
+uuid = "1.16.0"
