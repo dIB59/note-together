@@ -8,18 +8,6 @@ import { PageHeader } from '@/components/ui/PageHeader'
 const styles = `
   <style>
     /* Pageless editor styling */
-    .pageless-editor {
-      min-height: 80vh;
-      padding: 0;
-      position: relative;
-    }
-    
-    .pageless-editor .ProseMirror {
-      min-height: 80vh;
-      padding: 2rem 4rem;
-      max-width: 850px;
-      margin: 0 auto;
-    }
     
     /* Content styling */
     .pageless-editor .ProseMirror h1 {
