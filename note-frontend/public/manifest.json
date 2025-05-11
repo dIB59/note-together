@@ -1,6 +1,7 @@
 {
-  "short_name": "TanStack App",
-  "name": "Create TanStack App Sample",
+  "short_name": "Note Together",
+  "name": "Note Together",
+  "description": "A collaborative note-taking app built with React and TanStack Query.",
   "icons": [
     {
       "src": "favicon.ico",
