@@ -93,7 +93,7 @@ pub async fn save_doc(pool: &AnyPool, doc: &Doc, id: &str) -> Result<(), sqlx::E
 #[cfg(test)]
 mod tests {
     use super::*;
-    use sqlx::{any::{self, install_default_drivers, AnyPoolOptions}, sqlite::SqlitePoolOptions, Any, Pool};
+    use sqlx::any::{install_default_drivers, AnyPoolOptions};
 
     #[actix_rt::test]
     async fn test_load_settings() {
