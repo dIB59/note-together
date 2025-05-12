@@ -1,15 +1,17 @@
 use actix_web::{web, App, HttpServer};
-use config::Config;
+use infra::db;
 
-mod db;
 
+mod infra;
+mod routes;
+mod notes;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let settings = db::load_settings();
     let db_url = settings.database.url;
 
-    let pool = sqlx::SqlitePool::connect(&db_url)
+    let pool = sqlx::AnyPool::connect(&db_url)
         .await
         .expect("Failed to create database connection pool");
 
