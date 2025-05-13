@@ -1,12 +1,13 @@
-// BlogPage.tsx
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { Editor } from '@tiptap/react'
 import { NotesEditor } from '@/components/editor/NotesEditor'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { BlogLoadingPage } from '@/components/BlogLoadingPage'
 import '@/styles/pageless-editor.css'
 
-const BlogPage = () => {
+// Main content component that will be wrapped in Suspense
+const BlogContent = () => {
   const [editor, setEditor] = useState<Editor | null>(null)
   
   return (
@@ -22,6 +23,14 @@ const BlogPage = () => {
         </div>
       </div>
     </div>
+  )
+}
+
+const BlogPage = () => {
+  return (
+    <Suspense fallback={<BlogLoadingPage />}>
+      <BlogContent />
+    </Suspense>
   )
 }
 

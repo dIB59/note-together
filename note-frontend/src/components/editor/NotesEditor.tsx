@@ -2,6 +2,7 @@ import React from 'react'
 import { Editor, EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { EditorMenuBar } from './EditorMenuBar'
+import { EditorLoadingPage } from '@/components/editor/EditorLoadingPage'
 import { useEditorConfig } from '@/hooks/useEditorConfig'
 
 interface NotesEditorProps {
@@ -9,7 +10,7 @@ interface NotesEditorProps {
   setEditor: React.Dispatch<React.SetStateAction<Editor | null>>
 }
 
-export const NotesEditor: React.FC<NotesEditorProps> = ({ setEditor }) => {
+export const NotesEditor: React.FC<NotesEditorProps> = ({ editor, setEditor }) => {
   // If useEditorConfig hook isn't working, use fallback extensions
   const editorConfig = useEditorConfig ? useEditorConfig() : { 
     extensions: [StarterKit], 
@@ -48,9 +49,7 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ setEditor }) => {
         {tiptapEditor ? (
           <EditorContent editor={tiptapEditor} className="prose max-w-none" />
         ) : (
-          <div className="h-64 flex items-center justify-center text-gray-400">
-            Loading editor...
-          </div>
+          <EditorLoadingPage />
         )}
       </div>
     </div>
