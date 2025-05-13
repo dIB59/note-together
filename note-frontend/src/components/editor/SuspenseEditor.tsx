@@ -11,7 +11,7 @@ interface NoteEditorProps {
 
 // This version uses React.lazy and Suspense internally for editor loading
 export const SuspenseEditor: React.FC<NoteEditorProps> = ({ initialContent = '<p>Start writing...</p>' }) => {
-  const [editor, setEditor] = useState<Editor | null>(null)
+  const [_, setEditor] = useState<Editor | null>(null)
   const [isPending, startTransition] = useTransition()
   
   // Create editor with suspense-friendly loading

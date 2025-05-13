@@ -10,7 +10,7 @@ interface NotesEditorProps {
   setEditor: React.Dispatch<React.SetStateAction<Editor | null>>
 }
 
-export const NotesEditor: React.FC<NotesEditorProps> = ({ editor, setEditor }) => {
+export const NotesEditor: React.FC<NotesEditorProps> = ({ setEditor }) => {
   // If useEditorConfig hook isn't working, use fallback extensions
   const editorConfig = useEditorConfig ? useEditorConfig() : { 
     extensions: [StarterKit], 
