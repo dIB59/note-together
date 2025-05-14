@@ -48,7 +48,13 @@ mod tests {
 
     use super::*;
     use actix_web::test;
+    use actix_ws::Message;
+    use futures_util::SinkExt;
+    use url::Url;
     use sqlx::any::{install_default_drivers, AnyPoolOptions};
+    use awc::{ws::Frame, Client};
+    use actix_web_actors::ws::start;
+
 
     #[actix_rt::test]
     async fn test_ws_route() {
@@ -74,5 +80,55 @@ mod tests {
 
         println!("Response: {:?}", resp);
         assert!(resp.status().is_informational());
+    }
+
+    #[actix_rt::test]
+    async fn test_ws_ping_pong() {
+        let pool = infra::db::get_test_pool().await;
+
+        tokio::spawn(async move {
+            HttpServer::new(move || {
+                App::new()
+                    .app_data(web::Data::new(pool.clone()))
+                    .route("/test/ws", web::get().to(echo))
+            })
+            .bind("127.0.0.1:8081")
+            .expect("Failed to bind server")
+            .run()
+            .await
+            .expect("Failed to run server");
+        });
+
+        println!("Server running at http://localhost:8081");
+
+        let (response, mut connection) = Client::new()
+            .ws("http://localhost:8081/test/ws")
+            .connect()
+            .await
+            .expect("Failed to connect");
+
+        assert_eq!(response.status(), 101);
+
+        let message = Message::Ping("ping".into());
+        connection
+            .send(message)
+            .await
+            .unwrap();
+
+        let response = connection
+            .next()
+            .await
+            .expect("Failed to receive message")
+            .expect("Failed to receive message");
+
+        println!("Response: {:?}", response);
+
+        match response {
+            Frame::Pong(pong) => {
+                assert_eq!(pong, "ping");
+            }
+            _ => panic!("Expected PONG frame"),
+        }
+
     }
 }
