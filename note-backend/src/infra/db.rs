@@ -1,6 +1,6 @@
 use config::Config;
 use serde::Deserialize;
-use sqlx::{AnyPool, Row};
+use sqlx::{any::install_default_drivers, AnyPool, Row};
 use yrs::{updates::decoder::Decode, Doc, Transact};
 
 #[derive(Debug, Deserialize)]
@@ -90,7 +90,7 @@ pub async fn save_doc(pool: &AnyPool, doc: &Doc, id: &str) -> Result<(), sqlx::E
     Ok(())
 }
 
-pub async fn get_test_pool() -> Pool<sqlx::any::Any> {
+pub async fn get_test_pool() -> sqlx::Pool<sqlx::any::Any> {
     install_default_drivers();
         // Connect to in-memory SQLite database using AnyPool
     let pool = sqlx::any::AnyPoolOptions::new()
