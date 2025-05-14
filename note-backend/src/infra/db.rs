@@ -90,6 +90,20 @@ pub async fn save_doc(pool: &AnyPool, doc: &Doc, id: &str) -> Result<(), sqlx::E
     Ok(())
 }
 
+pub async fn get_test_pool() -> Pool<sqlx::any::Any> {
+    install_default_drivers();
+        // Connect to in-memory SQLite database using AnyPool
+    let pool = sqlx::any::AnyPoolOptions::new()
+        .max_connections(1)
+        .connect("sqlite::memory:")
+        .await
+        .expect("Failed to create database connection pool");
+
+    run_migrations(&pool).await.expect("Failed to run migrations");
+    pool
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
