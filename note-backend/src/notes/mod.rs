@@ -1,4 +1,4 @@
-use actix_web::{rt, web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web::{rt, web, Error, HttpRequest, HttpResponse};
 use actix_ws::AggregatedMessage;
 use futures_util::StreamExt as _;
 
@@ -17,21 +17,9 @@ async fn echo(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Er
         // receive messages from websocket
         while let Some(msg) = stream.next().await {
             match msg {
-                Ok(AggregatedMessage::Text(text)) => {
-                    // echo text message
-                    session.text(text).await.unwrap();
-                }
-
-                Ok(AggregatedMessage::Binary(bin)) => {
-                    // echo binary message
-                    session.binary(bin).await.unwrap();
-                }
-
-                Ok(AggregatedMessage::Ping(msg)) => {
-                    // respond to PING frame with PONG frame
-                    session.pong(&msg).await.unwrap();
-                }
-
+                Ok(AggregatedMessage::Text(text)) => session.text(text).await.unwrap(),
+                Ok(AggregatedMessage::Binary(bin)) => session.binary(bin).await.unwrap(),
+                Ok(AggregatedMessage::Ping(msg)) => session.pong(&msg).await.unwrap(),
                 _ => {}
             }
         }
@@ -46,7 +34,7 @@ mod tests {
 
     use crate::infra;
     use super::*;
-    use actix_web::test;
+    use actix_web::{test, HttpServer};
     use actix_ws::Message;
     use futures_util::SinkExt;
     use awc::{ws::Frame, Client};
@@ -57,7 +45,7 @@ mod tests {
         let pool = infra::db::get_test_pool().await;
 
         let app = test::init_service(
-            App::new()
+            actix_web::App::new()
                 .app_data(web::Data::new(pool))
                 .route("/{id}/ws", web::get().to(echo)),
         )
@@ -80,11 +68,11 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_ws_ping_pong() {
-        let pool = infra::db::get_test_pool().await;
+        let pool = infra::db::get_test_pool().await.expect("Failed to create test pool");
 
         tokio::spawn(async move {
             HttpServer::new(move || {
-                App::new()
+                actix_web::App::new()
                     .app_data(web::Data::new(pool.clone()))
                     .route("/test/ws", web::get().to(echo))
             })
@@ -120,9 +108,7 @@ mod tests {
         println!("Response: {:?}", response);
 
         match response {
-            Frame::Pong(pong) => {
-                assert_eq!(pong, "ping");
-            }
+            Frame::Pong(pong) => assert_eq!(pong, "ping"),
             _ => panic!("Expected PONG frame"),
         }
 

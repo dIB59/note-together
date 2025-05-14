@@ -10,7 +10,7 @@ mod notes;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let settings = db::load_settings();
-    let db_url = settings.database.url;
+    let db_url = settings.expect("Failed to load settings").database.url;
     install_default_drivers();
 
     let pool = sqlx::AnyPool::connect(&db_url)
