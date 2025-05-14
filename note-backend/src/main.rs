@@ -1,5 +1,6 @@
 use actix_web::{web, App, HttpServer};
 use infra::db;
+use sqlx::any::install_default_drivers;
 
 
 mod infra;
@@ -10,6 +11,7 @@ mod notes;
 async fn main() -> std::io::Result<()> {
     let settings = db::load_settings();
     let db_url = settings.database.url;
+    install_default_drivers();
 
     let pool = sqlx::AnyPool::connect(&db_url)
         .await

@@ -41,20 +41,16 @@ async fn echo(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Er
     Ok(res)
 }
 
+#[cfg(test)]
 mod tests {
-    use std::f64::consts::E;
 
     use crate::infra;
-
     use super::*;
     use actix_web::test;
     use actix_ws::Message;
     use futures_util::SinkExt;
-    use url::Url;
-    use sqlx::any::{install_default_drivers, AnyPoolOptions};
     use awc::{ws::Frame, Client};
-    use actix_web_actors::ws::start;
-
+    
 
     #[actix_rt::test]
     async fn test_ws_route() {
