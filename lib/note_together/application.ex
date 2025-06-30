@@ -17,7 +17,9 @@ defmodule NoteTogether.Application do
       # Start a worker by calling: NoteTogether.Worker.start_link(arg)
       # {NoteTogether.Worker, arg},
       # Start to serve requests, typically the last entry
-      NoteTogetherWeb.Endpoint
+      NoteTogetherWeb.Endpoint,
+      # Start the Presence module for tracking user presence
+      NoteTogether.Presence
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

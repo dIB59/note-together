@@ -1,19 +1,38 @@
 defmodule NoteTogetherWeb.NotesLive.Index do
-  use NoteTogetherWeb, :live_view
 
+  use NoteTogetherWeb, :live_view
+  alias NoteTogether.Presence
+
+  @topic "page:notes"
+
+  @spec mount(any(), nil | maybe_improper_list() | map(), Phoenix.LiveView.Socket.t()) ::
+          {:ok, any()}
   def mount(_params, session, socket) do
     # Subscribe to the PubSub topic "notes", only if mounting for the first time
-    Phoenix.PubSub.subscribe(NoteTogether.PubSub, "notes")
-    Phoenix.PubSub.broadcast(NoteTogether.PubSub, "notes", {:new_note, "Welcome to Note Together!"})
+     if connected?(socket) do
+      # Track presence with a unique user ID or random UUID if anonymous
+      Presence.track(self(), @topic, socket.id, %{})
+      Phoenix.PubSub.subscribe(NoteTogether.PubSub, @topic)
+    end
+
     {
       :ok,
       assign(socket,
         name: session["name"] || "guest",
-        total_people: 1,
+        total_people: list_users(),
         num_clicks: 0
       )
     }
 
+  end
+
+
+  defp list_users() do
+    # print the list of users in the console
+    users = Presence.list(@topic)
+    IO.inspect(users, label: "Users in the notes page")
+    # Return the count of users
+    Enum.count(users)
   end
 
   def handle_params(params, _, socket) do
@@ -28,9 +47,23 @@ defmodule NoteTogetherWeb.NotesLive.Index do
   # Handle incoming messages from the PubSub topic "notes"
   def handle_info({:new_note, note}, socket) do
     # Here you can handle the new note message, e.g., update the UI or log it
-    total_people = socket.assigns.total_people + 1
-    socket = assign(socket, total_people: total_people)
+    socket = assign(socket, total_people: list_users())
     {:noreply, socket}
+  end
+
+  def handle_info(
+    %Phoenix.Socket.Broadcast{
+        event: "presence_diff",
+        payload: %{joins: joins, leaves: leaves}
+      },
+      socket
+    ) do
+    IO.inspect(joins, label: "Joins")
+    socket = assign(socket, latest_join: Map.keys(joins))
+    IO.inspect(leaves, label: "Leaves")
+    socket = assign(socket, latest_leave: Map.keys(leaves))
+
+    {:noreply, assign(socket, total_people: list_users())}
   end
 
   def render(assigns) do
